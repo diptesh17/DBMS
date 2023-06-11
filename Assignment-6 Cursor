@@ -1,1 +1,30 @@
+/* Implicit Cursor - %found */ 
+
+
+DECLARE
+  v_rows_updated NUMBER;
+BEGIN
+  -- Update the status of inactive accounts
+  UPDATE accounts
+  SET status = 'active'
+  WHERE last_transaction_date < SYSDATE - 365;
+
+  -- Get the number of rows affected by the update
+  v_rows_updated := SQL%ROWCOUNT;
+
+  -- Display message based on the number of rows updated
+  IF v_rows_updated > 0 THEN
+    DBMS_OUTPUT.PUT_LINE(v_rows_updated || ' accounts have been activated');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('No inactive accounts found');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+/
+
+
+
 
