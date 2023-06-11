@@ -26,5 +26,40 @@ END;
 /
 
 
+/* Explicit cursor - Attendence */ 
+
+DECLARE
+  CURSOR c_students IS
+    SELECT roll, att
+    FROM stud21
+    WHERE att < 75;
+BEGIN
+  FOR rec IN c_students LOOP
+    -- Update the status of the student to 'D' in the stud21 table
+    UPDATE stud21
+    SET status = 'D'
+    WHERE roll = rec.roll;
+
+    -- Insert a record into the d_stud table for the detained student
+    INSERT INTO d_stud (roll, att)
+    VALUES (rec.roll, rec.att);
+  END LOOP;
+
+  -- Commit the changes
+  COMMIT;
+
+  -- Display a message indicating the number of students detained
+  DBMS_OUTPUT.PUT_LINE('Detained students: ' || c_students%ROWCOUNT);
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Rollback the changes in case of any error
+    ROLLBACK;
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+
+
 
 
