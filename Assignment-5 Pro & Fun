@@ -1,1 +1,69 @@
+/* Borrower */ 
 
+CREATE OR REPLACE PROCEDURE calculate_fine (
+  p_roll_no IN Borrower.Rollin%TYPE,
+  p_book_name IN Borrower.NameofBook%TYPE
+) IS
+  v_issue_date Borrower.DateofIssue%TYPE;
+  v_days_passed NUMBER;
+  v_fine_amt NUMBER;
+BEGIN
+  -- Retrieve the issue date for the given roll number and book name
+  SELECT DateofIssue INTO v_issue_date
+  FROM Borrower
+  WHERE Rollin = p_roll_no
+    AND NameofBook = p_book_name;
+
+  -- Calculate the number of days passed since the issue date
+  v_days_passed := TRUNC(SYSDATE) - v_issue_date;
+
+  -- Calculate the fine amount based on the number of days passed
+  IF v_days_passed <= 15 THEN
+    v_fine_amt := 0; -- No fine
+  ELSIF v_days_passed <= 30 THEN
+    v_fine_amt := 5 * (v_days_passed - 15); -- Rs. 5 per day
+  ELSE
+    v_fine_amt := 50 * (v_days_passed - 30); -- Rs. 50 per day
+  END IF;
+
+  -- Update the status from 'I' to 'R' for the given roll number and book name
+  UPDATE Borrower
+  SET Status = 'R'
+  WHERE Rollin = p_roll_no
+    AND NameofBook = p_book_name;
+
+  -- Insert the fine details into the Fine table
+  INSERT INTO Fine (Roll_no, Date, Amt)
+  VALUES (p_roll_no, SYSDATE, v_fine_amt);
+
+  DBMS_OUTPUT.PUT_LINE('Fine calculated: Rs ' || v_fine_amt);
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('No record found for the given roll number and book name.');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+
+--CALLING:
+
+
+DECLARE
+  v_roll_no Borrower.Rollin%TYPE := 12345; -- Replace with the actual roll number
+  v_book_name Borrower.NameofBook%TYPE := 'Sample Book'; -- Replace with the actual book name
+BEGIN
+  calculate_fine(p_roll_no => v_roll_no, p_book_name => v_book_name);
+END;
+/
+
+
+
+
+
+
+
+
+
+/*
