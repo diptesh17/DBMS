@@ -40,6 +40,80 @@ END;
 
 
 
+/* Business rule voileted */ 
+
+DECLARE
+  v_bal_due NUMBER;
+BEGIN
+  -- Get the bal_due value from the client_master table
+  SELECT bal_due INTO v_bal_due
+  FROM client_master
+  WHERE client_id = :client_id; -- Replace :client_id with the actual client ID
+
+  -- Check if the bal_due value is less than 0
+  IF v_bal_due < 0 THEN
+    -- Raise a user-defined exception
+    RAISE_APPLICATION_ERROR(-20001, 'Business rule violation: bal_due cannot be less than 0');
+  END IF;
+END;
+
+
+
+
+/* Borrower */ 
+
+DECLARE
+  v_roll_no borrower.roll_no%TYPE;
+  v_book_name borrower.name_of_book%TYPE;
+  v_date_of_issue borrower.dateofissue%TYPE;
+  v_status borrower.status%TYPE;
+  v_fine_amt NUMBER;
+  v_days NUMBER;
+BEGIN
+  -- Accept roll_no and name_of_book from the user
+  v_roll_no := &roll_no; -- Replace &roll_no with the actual input for roll_no
+  v_book_name := '&book_name'; -- Replace &book_name with the actual input for book_name
+
+  -- Retrieve the details of the borrower
+  SELECT dateofissue, status
+  INTO v_date_of_issue, v_status
+  FROM borrower
+  WHERE roll_no = v_roll_no;
+
+  -- Calculate the number of days since the date of issue
+  v_days := TRUNC(SYSDATE) - TRUNC(v_date_of_issue);
+
+  -- Check the number of days and calculate the fine amount
+  IF v_days <= 30 THEN
+    v_fine_amt := v_days * 5;
+  ELSE
+    v_fine_amt := v_days * 50;
+  END IF;
+
+  -- Update the status to 'R'
+  UPDATE borrower
+  SET status = 'R'
+  WHERE roll_no = v_roll_no;
+
+  -- Insert the fine details into the fine table if applicable
+  IF v_days > 15 THEN
+    INSERT INTO fine (roll_no, date, amt)
+    VALUES (v_roll_no, SYSDATE, v_fine_amt);
+  END IF;
+
+  -- Display the fine amount
+  DBMS_OUTPUT.PUT_LINE('Fine Amount: Rs ' || v_fine_amt);
+
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Borrower not found.');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+
 
 
 
