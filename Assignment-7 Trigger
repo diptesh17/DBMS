@@ -1,1 +1,72 @@
+/* update , del trigger on clientstr table */ 
 
+-- Update Trigger
+CREATE OR REPLACE TRIGGER clientmstr_update_trigger
+AFTER UPDATE ON clientmstr
+FOR EACH ROW
+BEGIN
+  -- Insert old values into audit_trade table
+  INSERT INTO audit_trade (col1, col2, col3)
+  VALUES (:OLD.col1, :OLD.col2, :OLD.col3);
+END;
+/
+
+-- Delete Trigger
+CREATE OR REPLACE TRIGGER clientmstr_delete_trigger
+AFTER DELETE ON clientmstr
+FOR EACH ROW
+BEGIN
+  -- Insert old values into audit_trade table
+  INSERT INTO audit_trade (col1, col2, col3)
+  VALUES (:OLD.col1, :OLD.col2, :OLD.col3);
+END;
+/  
+
+
+
+
+
+
+
+
+/*  before trigger - salary */ 
+
+
+
+
+CREATE OR REPLACE TRIGGER check_salary
+BEFORE INSERT OR UPDATE ON Emp
+FOR EACH ROW
+DECLARE
+  v_new_salary Emp.salary%TYPE;
+BEGIN
+  -- Retrieve the new salary value
+  IF INSERTING THEN
+    v_new_salary := :NEW.salary;
+  ELSIF UPDATING THEN
+    v_new_salary := :NEW.salary;
+  END IF;
+
+  -- Check if the new salary is less than Rs. 50,000
+  IF v_new_salary < 50000 THEN
+    -- Insert the new values into the Tracking table
+    INSERT INTO Tracking (e_no, salary)
+    VALUES (:NEW.e_no, v_new_salary);
+
+    -- Raise an error and reject the insert or update operation
+    RAISE_APPLICATION_ERROR(-20002, 'Salary cannot be less than Rs. 50,000');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+
+
+
+
+
+/*
