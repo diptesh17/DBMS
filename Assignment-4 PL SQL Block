@@ -1,1 +1,56 @@
+/* Attendence */ 
+
+DECLARE
+  v_roll NUMBER;
+  v_attendance NUMBER;
+  v_status CHAR(1);
+BEGIN
+  -- Get the roll number from the user
+  v_roll := &roll_number;
+
+  -- Retrieve the attendance for the given roll number
+  SELECT Att, Status INTO v_attendance, v_status
+  FROM Stud
+  WHERE Roll = v_roll;
+
+  -- Check if attendance is less than 75%
+  IF v_attendance < 75 THEN
+    -- Display message and update status as "D"
+    DBMS_OUTPUT.PUT_LINE('Term not granted');
+    UPDATE Stud
+    SET Status = 'D'
+    WHERE Roll = v_roll;
+  ELSE
+    -- Display message and update status as "ND"
+    DBMS_OUTPUT.PUT_LINE('Term granted');
+    UPDATE Stud
+    SET Status = 'ND'
+    WHERE Roll = v_roll;
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    -- Handle if roll number does not exist
+    DBMS_OUTPUT.PUT_LINE('Roll number does not exist');
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
