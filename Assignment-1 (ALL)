@@ -1,0 +1,1458 @@
+CREATE TABLE Account (
+  Acc_no INT PRIMARY KEY,
+  branch_name VARCHAR(50),
+  balance DECIMAL(10, 2)
+);
+
+CREATE TABLE branch (
+  branch_name VARCHAR(50) PRIMARY KEY,
+  branch_city VARCHAR(50),
+  assets DECIMAL(15, 2)
+);
+
+CREATE TABLE customer (
+  cust_name VARCHAR(50),
+  cust_street VARCHAR(100),
+  cust_city VARCHAR(50)
+);
+
+CREATE TABLE Depositor (
+  cust_name VARCHAR(50),
+  acc_no INT,
+  FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+  FOREIGN KEY (acc_no) REFERENCES Account(Acc_no)
+);
+
+CREATE TABLE Loan (
+  loan_no INT PRIMARY KEY,
+  branch_name VARCHAR(50),
+  amount DECIMAL(10, 2),
+  FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+CREATE TABLE Borrower (
+  cust_name VARCHAR(50),
+  loan_no INT,
+  FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+  FOREIGN KEY (loan_no) REFERENCES Loan(loan_no)
+);
+
+
+CREATE SYNONYM cust FOR customer;
+
+
+ALTER TABLE customer ADD COLUMN phone_number VARCHAR(20);
+
+
+ALTER TABLE customer DROP COLUMN phone_number;
+
+
+SELECT DISTINCT branch_name FROM Loan;
+
+
+SELECT c.cust_name, l.loan_no, l.amount
+FROM customer c
+JOIN Borrower b ON c.cust_name = b.cust_name
+JOIN Loan l ON b.loan_no = l.loan_no;
+
+
+SELECT c.cust_name
+FROM customer c
+JOIN Borrower b ON c.cust_name = b.cust_name
+JOIN Loan l ON b.loan_no = l.loan_no
+WHERE l.branch_name = 'Akurdi'
+ORDER BY c.cust_name ASC;
+
+
+SELECT c.cust_name
+FROM customer c
+LEFT JOIN Depositor d ON c.cust_name = d.cust_name
+LEFT JOIN Borrower b ON c.cust_name = b.cust_name
+WHERE d.cust_name IS NOT NULL OR b.cust_name IS NOT NULL;
+
+
+SELECT AVG(balance) AS average_balance
+FROM Account
+WHERE branch_name = 'Akurdi';
+
+
+SELECT a.branch_name, COUNT(d.acc_no) AS num_depositors
+FROM Account a
+LEFT JOIN Depositor d ON a.Acc_no = d.acc_no
+GROUP BY a.branch_name;
+
+
+DELETE FROM Account WHERE branch_name IN (SELECT branch_name FROM branch WHERE branch_city = 'Nigdi');
+DELETE FROM branch WHERE branch_city = 'Nigdi';
+
+
+------------------------------------------------------------------------------------------------------------------------------
+                                                      2. Problem Statement 2
+
+
+
+
+
+
+CREATE TABLE cust_mstr (
+  cust_no INT PRIMARY KEY,
+  fname VARCHAR(50),
+  lname VARCHAR(50)
+);
+
+CREATE TABLE add_dets (
+  code_no INT PRIMARY KEY,
+  add1 VARCHAR(100),
+  add2 VARCHAR(100),
+  state VARCHAR(50),
+  city VARCHAR(50),
+  pincode VARCHAR(10)
+);
+
+-- Inserting data into cust_mstr table
+INSERT INTO cust_mstr (cust_no, fname, lname)
+VALUES (1, 'John', 'Doe'),
+       (2, 'Jane', 'Smith'),
+       (3, 'Alice', 'Johnson');
+
+-- Inserting data into add_dets table
+INSERT INTO add_dets (code_no, add1, add2, state, city, pincode)
+VALUES (100, 'Street 1', 'Apartment A', 'California', 'Los Angeles', '90001'),
+       (101, 'Street 2', 'Apartment B', 'California', 'San Francisco', '94101'),
+       (102, 'Street 3', 'Apartment C', 'New York', 'New York City', '10001');
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+SELECT ad.add1, ad.add2, ad.city, ad.state, ad.pincode
+FROM cust_mstr cm
+JOIN add_dets ad ON cm.cust_no = ad.code_no
+WHERE cm.fname = 'xyz' AND cm.lname = 'pqr';
+
+------------------------------------------------------------------------------------------------------------------------------
+
+-- Creating a view on add_dets table
+CREATE VIEW add_dets_view AS
+SELECT code_no, add1, city
+FROM add_dets;
+
+-- Inserting a row into the view
+INSERT INTO add_dets_view (code_no, add1, city)
+VALUES (103, 'Street 4', 'Chicago');
+
+-- Updating a row in the view
+UPDATE add_dets_view
+SET city = 'New York City'
+WHERE code_no = 101;
+
+-- Deleting a row from the view
+DELETE FROM add_dets_view
+WHERE code_no = 102;
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE TABLE emp_mstr (
+  e_mpno INT PRIMARY KEY,
+  f_name VARCHAR(50),
+  l_name VARCHAR(50),
+  m_name VARCHAR(50),
+  dept VARCHAR(50),
+  desg VARCHAR(50),
+  branch_no INT
+);
+
+CREATE TABLE branch_mstr (
+  name VARCHAR(50),
+  b_no INT PRIMARY KEY
+);
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+SELECT e.*, b.name AS branch_name
+FROM emp_mstr e
+JOIN branch_mstr b ON e.branch_no = b.b_no;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       3. Problem Statement 3
+
+
+
+
+CREATE TABLE Account (
+  Acc_no NUMBER(10) PRIMARY KEY,
+  branch_name VARCHAR(50),
+  balance DECIMAL(10,2),
+  FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+CREATE TABLE branch (
+  branch_name VARCHAR(50) PRIMARY KEY,
+  branch_city VARCHAR(50),
+  assets DECIMAL(12,2)
+);
+
+CREATE TABLE customer (
+  cust_name VARCHAR(50) PRIMARY KEY,
+  cust_street VARCHAR(100),
+  cust_city VARCHAR(50)
+);
+
+CREATE TABLE Depositor (
+  cust_name VARCHAR(50),
+  acc_no NUMBER,
+  FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+  FOREIGN KEY (acc_no) REFERENCES Account(Acc_no)
+);
+
+CREATE TABLE Loan (
+  loan_no NUMBER(10) PRIMARY KEY,
+  branch_name VARCHAR(50),
+  amount DECIMAL(10,2),
+  FOREIGN KEY (branch_name) REFERENCES branch(branch_name)
+);
+
+CREATE TABLE Borrower (
+  cust_name VARCHAR(50),
+  loan_no NUMBER(10),
+  FOREIGN KEY (cust_name) REFERENCES customer(cust_name),
+  FOREIGN KEY (loan_no) REFERENCES Loan(loan_no)
+);
+
+-- Inserting data into tables
+INSERT INTO Account (Acc_no, branch_name, balance)
+VALUES (1, 'Branch A', 5000),
+       (2, 'Branch B', 10000),
+       (3, 'Branch C', 15000);
+
+INSERT INTO branch (branch_name, branch_city, assets)
+VALUES ('Branch A', 'City A', 200000),
+       ('Branch B', 'City B', 300000),
+       ('Branch C', 'City C', 400000);
+
+INSERT INTO customer (cust_name, cust_street, cust_city)
+VALUES ('John Doe', 'Street 1', 'City A'),
+       ('Jane Smith', 'Street 2', 'City B'),
+       ('Alice Johnson', 'Street 3', 'City C');
+
+INSERT INTO Depositor (cust_name, acc_no)
+VALUES ('John Doe', 1),
+       ('Jane Smith', 2),
+       ('Alice Johnson', 3);
+
+INSERT INTO Loan (loan_no, branch_name, amount)
+VALUES (101, 'Branch A', 15000),
+       (102, 'Branch B', 20000),
+       (103, 'Branch A', 10000);
+
+INSERT INTO Borrower (cust_name, loan_no)
+VALUES ('John Doe', 101),
+       ('Jane Smith', 102),
+       ('John Doe', 103);
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+ALTER TABLE branch
+CHANGE assets Property DECIMAL(12,2);
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT loan_no
+FROM Loan
+WHERE branch_name = 'Akurdi Branch' AND amount > 12000;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT c.cust_name
+FROM customer c
+INNER JOIN Depositor d ON c.cust_name = d.cust_name
+INNER JOIN Account a ON d.acc_no = a.Acc_no
+INNER JOIN Borrower b ON c.cust_name = b.cust_name
+INNER JOIN Loan l ON b.loan_no = l.loan_no;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT c.cust_name
+FROM customer c
+INNER JOIN Depositor d ON c.cust_name = d.cust_name
+LEFT JOIN Borrower b ON c.cust_name = b.cust_name
+WHERE b.cust_name IS NULL;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT branch_name, AVG(balance) AS avg_balance
+FROM Account
+GROUP BY branch_name;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT branch_name
+FROM Account
+GROUP BY branch_name
+HAVING AVG(balance) > 12000;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT COUNT(*) AS tuple_count
+FROM customer;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT SUM(amount) AS total_loan_amount
+FROM Loan;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+DELETE FROM Loan
+WHERE amount BETWEEN 1300 AND 1500;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+CREATE SEQUENCE roll_seq;
+
+CREATE TABLE student (
+  roll_no INT DEFAULT NEXT VALUE FOR roll_seq PRIMARY KEY,
+  name VARCHAR(50),
+  age INT
+);
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       4. Problem Statement 4
+
+
+
+
+CREATE TABLE cust_mstr (
+  custno INT PRIMARY KEY,
+  fname VARCHAR(50),
+  lname VARCHAR(50)
+);
+
+CREATE TABLE acc_fd_cust_dets (
+  codeno INT PRIMARY KEY,
+  acc_fd_no INT,
+  custno INT,
+  FOREIGN KEY (custno) REFERENCES cust_mstr(custno)
+);
+
+CREATE TABLE fd_dets (
+  fd_sr_no INT PRIMARY KEY,
+  amt DECIMAL(10,2)
+);
+
+-- Inserting data into tables
+INSERT INTO cust_mstr (custno, fname, lname)
+VALUES (1, 'John', 'Doe'),
+       (2, 'Jane', 'Smith'),
+       (3, 'Alice', 'Johnson');
+
+INSERT INTO acc_fd_cust_dets (codeno, acc_fd_no, custno)
+VALUES (101, 1001, 1),
+       (102, 1002, 2),
+       (103, 1003, 3);
+
+INSERT INTO fd_dets (fd_sr_no, amt)
+VALUES (1001, 6000),
+       (1002, 4000),
+       (1003, 8000);
+
+-- Listing customers holding fixed deposits of amount more than 5000
+SELECT c.*
+FROM cust_mstr c
+JOIN acc_fd_cust_dets ac ON c.custno = ac.custno
+JOIN fd_dets f ON ac.acc_fd_no = f.fd_sr_no
+WHERE f.amt > 5000;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+
+-- Creating the view
+CREATE VIEW cust_fd_view AS
+SELECT c.fname, ac.acc_fd_no
+FROM cust_mstr c
+JOIN acc_fd_cust_dets ac ON c.custno = ac.custno;
+
+-- Insert operation on the view
+INSERT INTO cust_fd_view (fname, acc_fd_no)
+VALUES ('Tom', 1004);
+
+-- Update operation on the view
+UPDATE cust_fd_view
+SET fname = 'Jerry'
+WHERE acc_fd_no = 1004;
+
+-- Delete operation on the view
+DELETE FROM cust_fd_view
+WHERE acc_fd_no = 1004;
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE TABLE emp_mstr (
+  emp_no INT PRIMARY KEY,
+  f_name VARCHAR(50),
+  l_name VARCHAR(50),
+  m_name VARCHAR(50),
+  dept VARCHAR(50)
+);
+
+CREATE TABLE cntc_dets (
+  code_no INT PRIMARY KEY,
+  cntc_type VARCHAR(50),
+  cntc_data VARCHAR(100)
+);
+
+-- Inserting data into tables
+INSERT INTO emp_mstr (emp_no, f_name, l_name, m_name, dept)
+VALUES (1, 'John', 'Doe', 'M', 'HR'),
+       (2, 'Jane', 'Smith', 'N', 'Finance'),
+       (3, 'Alice', 'Johnson', 'P', 'IT');
+
+INSERT INTO cntc_dets (code_no, cntc_type, cntc_data)
+VALUES (101, 'Email', 'john.doe@example.com'),
+       (102, 'Phone', '123-456-7890'),
+       (103, 'Email', 'jane.smith@example.com');
+
+-- Listing employee details along with contact details using left outer join
+SELECT e.*, c.cntc_type, c.cntc_data
+FROM emp_mstr e
+LEFT JOIN cntc_dets c ON e.emp_no = c.code_no;
+
+-- Listing employee details along with contact details using right join
+SELECT e.*, c.cntc_type, c.cntc_data
+FROM emp_mstr e
+RIGHT JOIN cntc_dets c ON e.emp_no = c.code_no;
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       5. Problem Statement 5
+
+
+
+CREATE TABLE cust_mstr (
+  cust_no INT PRIMARY KEY,
+  fname VARCHAR(50),
+  lname VARCHAR(50)
+);
+
+CREATE TABLE add_dets (
+  code_no INT PRIMARY KEY,
+  add1 VARCHAR(100),
+  add2 VARCHAR(100),
+  state VARCHAR(50),
+  city VARCHAR(50),
+  pincode VARCHAR(10)
+);
+
+-- Inserting data into tables
+INSERT INTO cust_mstr (cust_no, fname, lname)
+VALUES (1, 'John', 'Doe'),
+       (2, 'Jane', 'Smith'),
+       (3, 'Alice', 'Johnson');
+
+INSERT INTO add_dets (code_no, add1, add2, state, city, pincode)
+VALUES (101, 'Street 1', 'Apartment A', 'California', 'Los Angeles', '12345'),
+       (102, 'Street 2', 'Apartment B', 'New York', 'New York City', '67890'),
+       (103, 'Street 3', 'Apartment C', 'Texas', 'Houston', '45678');
+
+-- Retrieve the address of customer Fname as 'xyz' and Lname as 'pqr'
+SELECT a.*
+FROM cust_mstr c
+JOIN add_dets a ON c.cust_no = a.code_no
+WHERE c.fname = 'xyz' AND c.lname = 'pqr';
+
+-- Create a view on add_dets table by selecting any two columns
+CREATE VIEW add_dets_view AS
+SELECT add1, city
+FROM add_dets;
+
+-- Insert operation on the view
+INSERT INTO add_dets_view (add1, city)
+VALUES ('Street 4', 'Chicago');
+
+-- Update operation on the view
+UPDATE add_dets_view
+SET city = 'Seattle'
+WHERE add1 = 'Street 4';
+
+-- Delete operation on the view
+DELETE FROM add_dets_view
+WHERE city = 'Seattle';
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       6. Problem Statement 6
+
+
+
+DECLARE
+  v_roll NUMBER;
+  v_attendance NUMBER;
+  v_status CHAR(1);
+BEGIN
+  -- Get the roll number from the user
+  v_roll := &roll_number;
+
+  -- Retrieve the attendance for the given roll number
+  SELECT Att, Status INTO v_attendance, v_status
+  FROM Stud
+  WHERE Roll = v_roll;
+
+  -- Check if attendance is less than 75%
+  IF v_attendance < 75 THEN
+    -- Display message and update status as "D"
+    DBMS_OUTPUT.PUT_LINE('Term not granted');
+    UPDATE Stud
+    SET Status = 'D'
+    WHERE Roll = v_roll;
+  ELSE
+    -- Display message and update status as "ND"
+    DBMS_OUTPUT.PUT_LINE('Term granted');
+    UPDATE Stud
+    SET Status = 'ND'
+    WHERE Roll = v_roll;
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    -- Handle if roll number does not exist
+    DBMS_OUTPUT.PUT_LINE('Roll number does not exist');
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE
+  v_rows_updated NUMBER;
+BEGIN
+  -- Update the status of inactive accounts
+  UPDATE accounts
+  SET status = 'active'
+  WHERE last_transaction_date < SYSDATE - 365;
+
+  -- Get the number of rows affected by the update
+  v_rows_updated := SQL%ROWCOUNT;
+
+  -- Display message based on the number of rows updated
+  IF v_rows_updated > 0 THEN
+    DBMS_OUTPUT.PUT_LINE(v_rows_updated || ' accounts have been activated');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('No inactive accounts found');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred');
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       7. Problem Statement 7
+
+DECLARE
+  v_bal_due NUMBER;
+BEGIN
+  -- Get the bal_due value from the client_master table
+  SELECT bal_due INTO v_bal_due
+  FROM client_master
+  WHERE client_id = :client_id; -- Replace :client_id with the actual client ID
+
+  -- Check if the bal_due value is less than 0
+  IF v_bal_due < 0 THEN
+    -- Raise a user-defined exception
+    RAISE_APPLICATION_ERROR(-20001, 'Business rule violation: bal_due cannot be less than 0');
+  END IF;
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+DECLARE
+  v_avg_salary NUMBER;
+BEGIN
+  -- Calculate the average salary of the organization
+  SELECT AVG(salary) INTO v_avg_salary
+  FROM emp;
+
+  -- Update the salary of employees who have a salary less than the average salary
+  UPDATE emp
+  SET salary = salary + (salary * 0.1)
+  WHERE salary < v_avg_salary;
+
+  -- Insert records into the increment_salary table for the updated salaries
+  INSERT INTO increment_salary (E_no, Salary)
+  SELECT E_no, salary
+  FROM emp
+  WHERE salary < v_avg_salary;
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       8. Problem Statement 8
+
+
+
+
+DECLARE
+  v_roll_no borrower.roll_no%TYPE;
+  v_book_name borrower.name_of_book%TYPE;
+  v_date_of_issue borrower.dateofissue%TYPE;
+  v_status borrower.status%TYPE;
+  v_fine_amt NUMBER;
+  v_days NUMBER;
+BEGIN
+  -- Accept roll_no and name_of_book from the user
+  v_roll_no := &roll_no; -- Replace &roll_no with the actual input for roll_no
+  v_book_name := '&book_name'; -- Replace &book_name with the actual input for book_name
+
+  -- Retrieve the details of the borrower
+  SELECT dateofissue, status
+  INTO v_date_of_issue, v_status
+  FROM borrower
+  WHERE roll_no = v_roll_no;
+
+  -- Calculate the number of days since the date of issue
+  v_days := TRUNC(SYSDATE) - TRUNC(v_date_of_issue);
+
+  -- Check the number of days and calculate the fine amount
+  IF v_days <= 30 THEN
+    v_fine_amt := v_days * 5;
+  ELSE
+    v_fine_amt := v_days * 50;
+  END IF;
+
+  -- Update the status to 'R'
+  UPDATE borrower
+  SET status = 'R'
+  WHERE roll_no = v_roll_no;
+
+  -- Insert the fine details into the fine table if applicable
+  IF v_days > 15 THEN
+    INSERT INTO fine (roll_no, date, amt)
+    VALUES (v_roll_no, SYSDATE, v_fine_amt);
+  END IF;
+
+  -- Display the fine amount
+  DBMS_OUTPUT.PUT_LINE('Fine Amount: Rs ' || v_fine_amt);
+
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Borrower not found.');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       9. Problem Statement 9
+
+
+DECLARE
+  CURSOR c_students IS
+    SELECT roll, att
+    FROM stud21
+    WHERE att < 75;
+BEGIN
+  FOR rec IN c_students LOOP
+    -- Update the status of the student to 'D' in the stud21 table
+    UPDATE stud21
+    SET status = 'D'
+    WHERE roll = rec.roll;
+
+    -- Insert a record into the d_stud table for the detained student
+    INSERT INTO d_stud (roll, att)
+    VALUES (rec.roll, rec.att);
+  END LOOP;
+
+  -- Commit the changes
+  COMMIT;
+
+  -- Display a message indicating the number of students detained
+  DBMS_OUTPUT.PUT_LINE('Detained students: ' || c_students%ROWCOUNT);
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Rollback the changes in case of any error
+    ROLLBACK;
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       10. Problem Statement 10
+
+
+DECLARE
+  v_roll stud.roll%TYPE;
+  v_att stud.att%TYPE;
+  v_status stud.status%TYPE;
+BEGIN
+  -- Accept roll number from user
+  v_roll := &Enter_Roll_Number;
+
+  -- Retrieve attendance and status for the entered roll number
+  SELECT att, status
+  INTO v_att, v_status
+  FROM stud
+  WHERE roll = v_roll;
+
+  -- Check attendance and update status accordingly
+  IF v_att < 75 THEN
+    -- Attendance less than 75%, set status as 'D'
+    v_status := 'D';
+    DBMS_OUTPUT.PUT_LINE('Term not granted');
+  ELSE
+    -- Attendance 75% or above, set status as 'ND'
+    v_status := 'ND';
+    DBMS_OUTPUT.PUT_LINE('Term granted');
+  END IF;
+
+  -- Update the status in the stud table
+  UPDATE stud
+  SET status = v_status
+  WHERE roll = v_roll;
+
+  -- Commit the changes
+  COMMIT;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    -- Roll number not found in stud table
+    DBMS_OUTPUT.PUT_LINE('Invalid roll number');
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+    ROLLBACK;
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+-- Update Trigger
+CREATE OR REPLACE TRIGGER clientmstr_update_trigger
+AFTER UPDATE ON clientmstr
+FOR EACH ROW
+BEGIN
+  -- Insert old values into audit_trade table
+  INSERT INTO audit_trade (col1, col2, col3)
+  VALUES (:OLD.col1, :OLD.col2, :OLD.col3);
+END;
+/
+
+-- Delete Trigger
+CREATE OR REPLACE TRIGGER clientmstr_delete_trigger
+AFTER DELETE ON clientmstr
+FOR EACH ROW
+BEGIN
+  -- Insert old values into audit_trade table
+  INSERT INTO audit_trade (col1, col2, col3)
+  VALUES (:OLD.col1, :OLD.col2, :OLD.col3);
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       11. Problem Statement 11
+
+
+
+CREATE OR REPLACE FUNCTION check_account_status(
+  p_account_no IN acct_details.account_no%TYPE,
+  p_branch_name IN acct_details.branch_name%TYPE
+) RETURN VARCHAR2
+IS
+  v_status acct_details.status%TYPE;
+BEGIN
+  -- Retrieve account status
+  SELECT status
+  INTO v_status
+  FROM acct_details
+  WHERE account_no = p_account_no
+    AND branch_name = p_branch_name;
+
+  -- Check account status and perform actions accordingly
+  IF v_status = 'active' THEN
+    -- Account is active
+    -- Store account details in active_acc_details table
+    INSERT INTO active_acc_details (account_no, branch_name)
+    VALUES (p_account_no, p_branch_name);
+
+    -- Return message
+    RETURN 'Account is active. Account details stored.';
+  ELSE
+    -- Account is inactive
+    -- Return message
+    RETURN 'Account is inactive.';
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    -- Account not found
+    RETURN 'Account not found.';
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    RETURN 'An error occurred: ' || SQLERRM;
+END;
+/
+
+
+
+--CALLING :
+
+
+DECLARE
+  v_account_no acct_details.account_no%TYPE;
+  v_branch_name acct_details.branch_name%TYPE;
+  v_message VARCHAR2(100);
+BEGIN
+  -- Accept account number and branch name from user
+  v_account_no := &Enter_Account_Number;
+  v_branch_name := '&Enter_Branch_Name';
+
+  -- Call the stored function and get the result
+  v_message := check_account_status(v_account_no, v_branch_name);
+
+  -- Display the result
+  DBMS_OUTPUT.PUT_LINE(v_message);
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       12. Problem Statement 12
+
+
+
+DECLARE
+  v_bal_due client_master.bal_due%TYPE;
+BEGIN
+  -- Retrieve the value of bal_due
+  SELECT bal_due INTO v_bal_due FROM client_master WHERE ...;
+
+  -- Check if bal_due is less than 0
+  IF v_bal_due < 0 THEN
+    -- Raise a user-defined exception with a custom error message and error code
+    RAISE_APPLICATION_ERROR(-20001, 'Business rule violated: bal_due cannot be less than 0');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE TRIGGER check_salary
+BEFORE INSERT OR UPDATE ON Emp
+FOR EACH ROW
+DECLARE
+  v_new_salary Emp.salary%TYPE;
+BEGIN
+  -- Retrieve the new salary value
+  IF INSERTING THEN
+    v_new_salary := :NEW.salary;
+  ELSIF UPDATING THEN
+    v_new_salary := :NEW.salary;
+  END IF;
+
+  -- Check if the new salary is less than Rs. 50,000
+  IF v_new_salary < 50000 THEN
+    -- Raise an error and reject the insert or update operation
+    RAISE_APPLICATION_ERROR(-20002, 'Salary cannot be less than Rs. 50,000');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+ The new values that are expected to be inserted or updated can be stored in the Tracking table by adding an INSERT statement within the trigger block.
+ Here's an example of how to do it:
+
+
+CREATE OR REPLACE TRIGGER check_salary
+BEFORE INSERT OR UPDATE ON Emp
+FOR EACH ROW
+DECLARE
+  v_new_salary Emp.salary%TYPE;
+BEGIN
+  -- Retrieve the new salary value
+  IF INSERTING THEN
+    v_new_salary := :NEW.salary;
+  ELSIF UPDATING THEN
+    v_new_salary := :NEW.salary;
+  END IF;
+
+  -- Check if the new salary is less than Rs. 50,000
+  IF v_new_salary < 50000 THEN
+    -- Insert the new values into the Tracking table
+    INSERT INTO Tracking (e_no, salary)
+    VALUES (:NEW.e_no, v_new_salary);
+
+    -- Raise an error and reject the insert or update operation
+    RAISE_APPLICATION_ERROR(-20002, 'Salary cannot be less than Rs. 50,000');
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any other exceptions
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       13. Problem Statement 13
+
+
+CREATE OR REPLACE PROCEDURE calculate_fine (
+  p_roll_no IN Borrower.Rollin%TYPE,
+  p_book_name IN Borrower.NameofBook%TYPE
+) IS
+  v_issue_date Borrower.DateofIssue%TYPE;
+  v_days_passed NUMBER;
+  v_fine_amt NUMBER;
+BEGIN
+  -- Retrieve the issue date for the given roll number and book name
+  SELECT DateofIssue INTO v_issue_date
+  FROM Borrower
+  WHERE Rollin = p_roll_no
+    AND NameofBook = p_book_name;
+
+  -- Calculate the number of days passed since the issue date
+  v_days_passed := TRUNC(SYSDATE) - v_issue_date;
+
+  -- Calculate the fine amount based on the number of days passed
+  IF v_days_passed <= 15 THEN
+    v_fine_amt := 0; -- No fine
+  ELSIF v_days_passed <= 30 THEN
+    v_fine_amt := 5 * (v_days_passed - 15); -- Rs. 5 per day
+  ELSE
+    v_fine_amt := 50 * (v_days_passed - 30); -- Rs. 50 per day
+  END IF;
+
+  -- Update the status from 'I' to 'R' for the given roll number and book name
+  UPDATE Borrower
+  SET Status = 'R'
+  WHERE Rollin = p_roll_no
+    AND NameofBook = p_book_name;
+
+  -- Insert the fine details into the Fine table
+  INSERT INTO Fine (Roll_no, Date, Amt)
+  VALUES (p_roll_no, SYSDATE, v_fine_amt);
+
+  DBMS_OUTPUT.PUT_LINE('Fine calculated: Rs ' || v_fine_amt);
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('No record found for the given roll number and book name.');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+
+--CALLING:
+
+
+DECLARE
+  v_roll_no Borrower.Rollin%TYPE := 12345; -- Replace with the actual roll number
+  v_book_name Borrower.NameofBook%TYPE := 'Sample Book'; -- Replace with the actual book name
+BEGIN
+  calculate_fine(p_roll_no => v_roll_no, p_book_name => v_book_name);
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       14. Problem Statement 14
+
+
+
+CREATE OR REPLACE PROCEDURE proc_Grade (
+  p_name IN Stud_Marks.name%TYPE,
+  p_total_marks IN Stud_Marks.total_marks%TYPE,
+  p_class OUT Result.Class%TYPE
+) IS
+BEGIN
+  IF p_total_marks >= 990 THEN
+    p_class := 'Distinction';
+  ELSIF p_total_marks >= 900 THEN
+    p_class := 'First Class';
+  ELSIF p_total_marks >= 825 THEN
+    p_class := 'Higher Second Class';
+  ELSE
+    p_class := 'Not Categorized';
+  END IF;
+  
+  -- Insert the result into the Result table
+  INSERT INTO Result (Roll, Name, Class)
+  VALUES (NULL, p_name, p_class);
+  
+  DBMS_OUTPUT.PUT_LINE('Student ' || p_name || ' has been categorized as ' || p_class);
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+
+--CALLING: 
+
+
+DECLARE
+  v_name Stud_Marks.name%TYPE := 'John Doe'; -- Replace with the actual student name
+  v_total_marks Stud_Marks.total_marks%TYPE := 950; -- Replace with the actual total marks
+  v_class Result.Class%TYPE;
+BEGIN
+  proc_Grade(p_name => v_name, p_total_marks => v_total_marks, p_class => v_class);
+END;
+/
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       15. Problem Statement 15
+
+
+
+
+Create the "Teachers" collection:
+
+use PCCOE
+db.createCollection("Teachers")
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Create the "Students" collection:
+
+db.createCollection("Students")
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Find information about all teachers:
+
+db.Teachers.find({})
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Find information about all teachers of the computer department:
+
+db.Teachers.find({ dname: "Computer" })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Find information about all teachers of computer, IT, and E&TC departments:
+
+db.Teachers.find({ dname: { $in: ["Computer", "IT", "E&TC"] } })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Find information about all teachers of computer, IT, and E&TC departments with a salary greater than or equal to 10000:
+
+db.Teachers.find({ dname: { $in: ["Computer", "IT", "E&TC"] }, salary: { $gte: 10000 } })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Find student information with roll_no = 2 or Sname = "xyz":
+
+db.Students.find({ $or: [{ roll_no: 2 }, { Sname: "xyz" }] })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Update the experience of teacher "praveen" to 10 years:
+
+db.Teachers.updateOne({ Tname: "praveen" }, { $set: { experience: 10 } }, { upsert: true })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Update the department of all teachers working in the IT department to "COMP":
+
+db.Teachers.updateMany({ dname: "IT" }, { $set: { dname: "COMP" } })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Find teachers' names and their experience from the Teachers collection:
+
+db.Teachers.find({}, { Tname: 1, experience: 1 })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Insert an entry in the Department collection using the save() method:
+
+db.Department.save({ name: "Department Name" })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Change the department of teacher "praveen" to "IT" using the save() method:
+
+db.Teachers.save({ Tname: "praveen", dname: "IT" })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Delete all documents from the Teachers collection with the IT department:
+
+db.Teachers.deleteMany({ dname: "IT" })
+
+------------------------------------------------------------------------------------------------------------------------------
+
+Display the first 3 documents in the Teachers collection in ascending order with the pretty() method:
+
+db.Teachers.find().limit(3).sort({ _id: 1 }).pretty()
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+
+                                                       16. Problem Statement 16
+
+
+
+SELECT Pname FROM Parts WHERE Color = 'green';
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT DISTINCT Sname FROM Supplier
+WHERE Sid IN (SELECT Sid FROM Catalog WHERE pid IN (SELECT Pid FROM Parts WHERE Color = 'red'));
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT Pname FROM Parts WHERE Pid IN (SELECT pid FROM Catalog WHERE cost > 25);
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT p.street, p.city
+FROM Person p
+JOIN Manages m ON p.pname = m.pname
+JOIN Company c ON m.mname = c.cname
+WHERE c.cname = 'Idea' AND p.city = 'Pune' AND p.salary > 3000;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT s.name, AVG(m.marks) AS average_marks
+FROM Student s
+JOIN Marks m ON s.Rollno = m.Rollno
+GROUP BY s.Rollno, s.name;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+SELECT COUNT(*) AS failed_students
+FROM Student s
+JOIN Marks m ON s.Rollno = m.Rollno
+WHERE m.sub_code = 'DBMS' AND m.marks < 40;
+
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       17. Problem Statement 17
+
+
+
+DECLARE
+  v_account_number NUMBER;
+  v_balance NUMBER;
+  v_minimum_balance NUMBER := 1000; -- Assuming minimum balance is Rs. 1000/-
+BEGIN
+  -- Accept account number from user
+  v_account_number := &account_number; -- You can replace "&account_number" with an actual account number input mechanism
+
+  -- Get the balance of the account
+  SELECT balance INTO v_balance
+  FROM accounts
+  WHERE account_number = v_account_number; -- Replace "accounts" with your actual account table name
+
+  -- Check if the balance is less than the minimum balance
+  IF v_balance < v_minimum_balance THEN
+    -- Deduct Rs. 100/- from the balance
+    v_balance := v_balance - 100;
+
+    -- Update the balance in the account table
+    UPDATE accounts
+    SET balance = v_balance
+    WHERE account_number = v_account_number;
+
+    -- Display a message indicating the deduction
+    DBMS_OUTPUT.PUT_LINE('Rs. 100/- deducted from account ' || v_account_number);
+  ELSE
+    -- Display a message indicating that the balance is sufficient
+    DBMS_OUTPUT.PUT_LINE('Balance of account ' || v_account_number || ' is sufficient.');
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    -- Handle the case when the account number is not found
+    DBMS_OUTPUT.PUT_LINE('Account number ' || v_account_number || ' not found.');
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       18. Problem Statement 18
+
+
+DECLARE
+  v_number NUMBER := 1234; -- Change this value to the number you want to invert
+  v_inverted_number NUMBER := 0;
+  v_digit NUMBER;
+BEGIN
+  WHILE v_number > 0 LOOP
+    v_digit := v_number MOD 10; -- Get the last digit of the number
+    v_inverted_number := v_inverted_number * 10 + v_digit; -- Append the digit to the inverted number
+    v_number := v_number / 10; -- Remove the last digit from the number
+  END LOOP;
+
+  -- Display the inverted number
+  DBMS_OUTPUT.PUT_LINE('Inverted number: ' || v_inverted_number);
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions that may occur
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       19. Problem Statement 19
+
+
+DECLARE
+  CURSOR c_accounts IS
+    SELECT acc_no, opening_date, account_type
+    FROM account
+    WHERE last_transaction_date <= SYSDATE - 365;
+
+  v_acc_no account.acc_no%TYPE;
+  v_opening_date account.opening_date%TYPE;
+  v_account_type account.account_type%TYPE;
+BEGIN
+  FOR account_rec IN c_accounts LOOP
+    -- Retrieve the account details from the cursor
+    v_acc_no := account_rec.acc_no;
+    v_opening_date := account_rec.opening_date;
+    v_account_type := account_rec.account_type;
+
+    -- Mark the account as inactive (I)
+    UPDATE account
+    SET status = 'I'
+    WHERE acc_no = v_acc_no;
+
+    -- Insert a record in INACT_MASTER_TABLE
+    INSERT INTO inact_master_table(acc_no, opening_date, account_type)
+    VALUES (v_acc_no, v_opening_date, v_account_type);
+  END LOOP;
+
+  DBMS_OUTPUT.PUT_LINE('Inactive accounts marked successfully');
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions that may occur
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       20. Problem Statement 20
+
+DECLARE
+  CURSOR c_new_branches IS
+    SELECT *
+    FROM new_branches;
+
+  v_branch_id new_branches.branch_id%TYPE;
+  v_branch_name new_branches.branch_name%TYPE;
+  v_branch_city new_branches.branch_city%TYPE;
+  -- Add more variables for additional columns if needed
+
+  v_exists BOOLEAN;
+BEGIN
+  FOR branch_rec IN c_new_branches LOOP
+    -- Retrieve the data from the new_branches table
+    v_branch_id := branch_rec.branch_id;
+    v_branch_name := branch_rec.branch_name;
+    v_branch_city := branch_rec.branch_city;
+    -- Assign values for additional columns if needed
+
+    -- Check if the data already exists in the BRANCH_MASTER table
+    SELECT COUNT(*)
+    INTO v_exists
+    FROM branch_master
+    WHERE branch_id = v_branch_id
+      AND branch_name = v_branch_name
+      AND branch_city = v_branch_city;
+    -- Add conditions for additional columns if needed
+
+    -- If the data doesn't exist, insert it into the BRANCH_MASTER table
+    IF v_exists = 0 THEN
+      INSERT INTO branch_master(branch_id, branch_name, branch_city)
+      VALUES (v_branch_id, v_branch_name, v_branch_city);
+      -- Insert values for additional columns if needed
+
+      DBMS_OUTPUT.PUT_LINE('Data inserted for branch_id: ' || v_branch_id);
+    ELSE
+      DBMS_OUTPUT.PUT_LINE('Data skipped for branch_id: ' || v_branch_id || ' (already exists)');
+    END IF;
+  END LOOP;
+
+  DBMS_OUTPUT.PUT_LINE('Data merge completed successfully');
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions that may occur
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       21. Problem Statement 21
+
+
+DECLARE
+  v_account_number account_master.account_number%TYPE := '&Enter_Account_Number';
+  v_customer_name account_master.customer_name%TYPE;
+  v_introducer account_master.introducer%TYPE;
+BEGIN
+  -- Retrieve the customer and introducer information from the ACCOUNT_MASTER table
+  SELECT customer_name, introducer
+  INTO v_customer_name, v_introducer
+  FROM account_master
+  WHERE account_number = v_account_number;
+
+  -- Insert the information into the ACCOUNT_MASTER_INFO table
+  INSERT INTO account_master_info(account_number, customer_name, introducer)
+  VALUES (v_account_number, v_customer_name, v_introducer);
+
+  DBMS_OUTPUT.PUT_LINE('Data inserted successfully');
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Invalid account number entered');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       22. Problem Statement 22
+
+
+CREATE OR REPLACE FUNCTION F_checkAccNO(p_account_no IN account_master.account_number%TYPE)
+  RETURN NUMBER
+IS
+  v_count NUMBER := 0;
+BEGIN
+  -- Check if the account number exists in the ACCOUNT_MASTER table
+  SELECT COUNT(*)
+  INTO v_count
+  FROM account_master
+  WHERE account_number = p_account_no;
+
+  -- Return 1 if account number exists, otherwise return 0
+  IF v_count > 0 THEN
+    RETURN 1;
+  ELSE
+    RETURN 0;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions, such as database errors
+    RETURN 0;
+END;
+/
+
+
+--CALLING:
+
+
+DECLARE
+  v_account_no account_master.account_number%TYPE := '&Enter_Account_Number';
+  v_exists NUMBER;
+BEGIN
+  v_exists := F_checkAccNO(v_account_no);
+  IF v_exists = 1 THEN
+    DBMS_OUTPUT.PUT_LINE('Account number exists');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Account number does not exist');
+  END IF;
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       23. Problem Statement 23
+
+
+CREATE OR REPLACE TRIGGER customers_salary_trigger
+AFTER INSERT OR UPDATE OR DELETE ON customers
+FOR EACH ROW
+DECLARE
+  v_old_salary customers.salary%TYPE;
+  v_new_salary customers.salary%TYPE;
+BEGIN
+  IF INSERTING THEN
+    -- New row is being inserted
+    v_new_salary := :NEW.salary;
+    DBMS_OUTPUT.PUT_LINE('New salary: ' || v_new_salary);
+  ELSIF UPDATING THEN
+    -- Existing row is being updated
+    v_old_salary := :OLD.salary;
+    v_new_salary := :NEW.salary;
+    DBMS_OUTPUT.PUT_LINE('Old salary: ' || v_old_salary || ', New salary: ' || v_new_salary);
+  ELSIF DELETING THEN
+    -- Existing row is being deleted
+    v_old_salary := :OLD.salary;
+    DBMS_OUTPUT.PUT_LINE('Old salary: ' || v_old_salary);
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Handle any exceptions, such as database errors
+    NULL;
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
+
+                                                       24. Problem Statement 24
+
+
+DECLARE
+  v_num_rows NUMBER;
+BEGIN
+  -- Increase the salary of each customer by 500
+  UPDATE Customer
+  SET salary = salary + 500;
+  
+  -- Get the number of rows affected by the update operation
+  v_num_rows := SQL%ROWCOUNT;
+  
+  -- Display the number of rows affected
+  DBMS_OUTPUT.PUT_LINE('Number of rows updated: ' || v_num_rows);
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------
